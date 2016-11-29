@@ -1,0 +1,31 @@
+#!/bin/bash
+
+while [ "$1" != "" ]; do
+  case $1 in
+    --conf-dir )
+      shift
+      conf_dir=$1
+  esac
+  shift
+done
+
+echo $conf_dir
+
+if [ -z "$conf_dir" ]; then
+  echo "Syntax ./terraform --conf-dir [dir]"
+  exit 1
+fi
+
+IMAGE=terraform-cli:v1
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ -z $(docker images --format "table {{.Repository}}:{{.Tag}}" | grep $IMAGE) ]; then
+  echo "Building docker image"
+  test=$(docker build -t $IMAGE $DIR 2>&1)
+  if [ $? -ne 0 ]; then
+    echo "Failed to build supporting container"
+    exit 1
+  fi
+fi
+
+docker run --name terraform-cli --rm -v $conf_dir:/opt/conf $IMAGE apply
