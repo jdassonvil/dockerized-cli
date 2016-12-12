@@ -5,6 +5,10 @@ while [ "$1" != "" ]; do
     --conf-dir )
       shift
       conf_dir=$1
+      ;;
+    *)
+      cmd=$1
+      ;;
   esac
   shift
 done
@@ -12,7 +16,14 @@ done
 echo $conf_dir
 
 if [ -z "$conf_dir" ]; then
-  echo "Syntax ./terraform --conf-dir [dir]"
+  echo "Missng configuration directory"
+  echo "Syntax ./terraform --conf-dir [dir] cmd"
+  exit 1
+fi
+
+if [ -z "$cmd"  ]; then
+  echo "Missng terraform command"
+  echo "Syntax ./terraform --conf-dir [dir] cmd"
   exit 1
 fi
 
@@ -28,4 +39,4 @@ if [ -z $(docker images --format "table {{.Repository}}:{{.Tag}}" | grep $IMAGE)
   fi
 fi
 
-docker run --name terraform-cli --rm -v $conf_dir:/opt/conf $IMAGE apply
+docker run --name terraform-cli --rm -v $conf_dir:/opt/conf $IMAGE $cmd 
