@@ -39,4 +39,4 @@ if [ -z $(docker images --format "table {{.Repository}}:{{.Tag}}" | grep $IMAGE)
   fi
 fi
 
-docker run --name terraform-cli --rm -v $conf_dir:/opt/conf $IMAGE $cmd 
+docker run --rm --name terraform-cli --rm -v $conf_dir:/opt/conf $IMAGE $cmd 
