@@ -6,6 +6,10 @@ while [ "$1" != "" ]; do
       shift
       conf_dir=$1
       ;;
+    --ssh-dir )
+      shift
+      ssh_dir=$1
+      ;;
     --region )
       shift
       region=$1
@@ -23,6 +27,11 @@ if [ -z "$conf_dir" ]; then
   echo "Missng configuration directory"
   echo "Syntax ./terraform --conf-dir [dir] cmd"
   exit 1
+fi
+
+
+if [ -z "$ssh_dir" ]; then
+  ssh_dir=$conf_dir
 fi
 
 if [ -z "$cmd"  ]; then
@@ -44,7 +53,10 @@ if [ -z $(docker images --format "table {{.Repository}}:{{.Tag}}" | grep $IMAGE)
 fi
 
 TARGET_CONF_DIR="/var/terraform"
+TARGET_SSH_DIR="/root/.ssh"
 
-docker run --rm --name terraform-cli -v $conf_dir:$TARGET_CONF_DIR -e OS_REGION_NAME=$region \
-  $IMAGE $cmd $TARGET_CONF_DIR
-
+docker run --rm --name terraform-cli \
+  -v $conf_dir:$TARGET_CONF_DIR \
+  -v $ssh_dir:$TARGET_SSH_DIR \
+  -e OS_REGION_NAME=$region \
+  $IMAGE $cmd
